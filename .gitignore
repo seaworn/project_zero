@@ -1,0 +1,9 @@
+#Ignore folders
+__pycache__/
+env/
+node_modules/
+.vscode
+
+#Ignore files
+.env
+*.sqlite3

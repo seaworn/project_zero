@@ -1,0 +1,9 @@
+{% import "bootstrap/wtf.html" as wtf %}
+
+<h1>Register</h1>
+<hr class="my-4">
+<form class="form" role="form" action="{{ url_for('user.register') }}" method="post">
+    {{ wtf.quick_form(user_form) }}
+</form>
+<hr class="my-4">
+<p>Already have an account? <a href="{{ url_for('user.login') }}">Login</a></p>
