@@ -1,45 +1,38 @@
-from flask import render_template, Blueprint, url_for, redirect, flash, request
+from flask import render_template, Blueprint, url_for, redirect, flash, request, jsonify, abort
 from flask_login import login_user, logout_user, login_required
 
-from app import db
 from .models import User
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegistrationForm
 
 
-user_blueprint = Blueprint('user', __name__,)
+user_blueprint = Blueprint('user', __name__, url_prefix='/api')
 
 
-@user_blueprint.route('/register', methods=['GET', 'POST'])
+@user_blueprint.route('/register', methods=['POST'])
 def register():
-    form = RegisterForm(request.form)
+    form = RegistrationForm(data=request.get_json())
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data, password=form.password.data)
-        db.session.add(user)
-        db.session.commit()
+        user.save()
         login_user(user)
-        flash('Welcome! Thank you for registering.', 'success')
-        return redirect(url_for("main.home"))
-    return render_template('main/home.html', user_form=form, user_is_new=True)
+        return jsonify(username=user.username, logged_in=True, message='Registration successful. You are logged in.')
+    return jsonify(validation_error=True, errors=form.errors, logged_in=False)
 
 
-@user_blueprint.route('/login', methods=['GET', 'POST'])
+@user_blueprint.route('/login', methods=['POST'])
 def login():
-    form = LoginForm(request.form)
+    form = LoginForm(data=request.get_json())
     if form.validate_on_submit():
-        user = User.query.filter(
-            db.or_(User.username == form.username.data, User.email == form.username.data)).first()
-        if user is not None and user.check_password(form.password.data):
+        user = User.authenticate(form.user_id.data, form.password.data)
+        if user is not None:
             login_user(user)
-            flash('You are now logged in.', 'success')
-            return redirect(url_for('main.home'))
-        else:
-            flash('Wrong username/email or password.', 'danger')
-    return render_template('main/home.html', user_form=form)
+            return jsonify(username=user.username, logged_in=True, message='Login successful.')
+        return jsonify(authentication_error=True, message='Wrong user ID or password.', logged_in=False)
+    return jsonify(validation_error=True, errors=form.errors, logged_in=False)
 
 
 @user_blueprint.route('/logout')
 @login_required
 def logout():
     logout_user()
-    flash('You were logged out. Bye!', 'info')
-    return redirect(url_for('main.home'))
+    return jsonify(logged_in=False, message='You have been logged out.')

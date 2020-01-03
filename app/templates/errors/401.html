@@ -5,8 +5,8 @@
 {% block content %}
     <div class="jumbotron">
         <div class="text-center">
-            <h1>401 - Unauthorised</h1>
-            <p>You are not authorized to view this page. Please <a href="{{ url_for('user.login')}}">log in</a>.</p>
+            <h1>401 - Unauthorized</h1>
+            <p>{{ error.description }}. Please <a href="{{ url_for('user.login') }}">log in</a>.</p>
         </div>
     </div>
 {% endblock %}

@@ -4,10 +4,11 @@ from flask_login import UserMixin, AnonymousUserMixin
 from sqlalchemy.ext.hybrid import hybrid_property
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import db
+from .. import db
+from ..utils import ModelMixin
 
 
-class User(db.Model, UserMixin):
+class User(db.Model, UserMixin, ModelMixin):
 
     __tablename__ = 'users'
 
@@ -26,8 +27,12 @@ class User(db.Model, UserMixin):
     def password(self, password):
         self.password_hash = generate_password_hash(password)
 
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
+    @classmethod
+    def authenticate(cls, user_id, password):
+        user = cls.query.filter(db.or_(cls.username == user_id, cls.email == user_id)).first()
+        if user is not None and check_password_hash(user.password, password):
+            return user
+        return None
 
     def __str__(self):
         return '<User: %s>' % self.username
