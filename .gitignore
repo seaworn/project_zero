@@ -1,8 +1,8 @@
-#Ignore folders
-/__pycache__
-/env
-.vscode
+# Ignore folders
+__pycache__/
+env/
+.vscode/
 
-#Ignore files
+# Ignore files
 .env
 *.sqlite3
