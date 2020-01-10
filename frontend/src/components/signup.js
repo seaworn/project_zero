@@ -5,11 +5,11 @@ import axios from 'axios';
 import { NotificationManager } from 'react-notifications';
 
 import Home from './home';
-import { AppContext } from '../store';
+import { StoreContext } from '../store';
 
 export default function Signup() {
 
-  const {setLoggedUser} = useContext(AppContext)
+  const {setLoggedUser} = useContext(StoreContext)
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [passwordOne, setPasswordOne] = useState('');
@@ -23,7 +23,7 @@ export default function Signup() {
     setValidated(true);
     if (form.checkValidity() === false) return;
     axios
-      .post(`/api/register`, { username, email, password_one: passwordOne, password_two: passwordTwo })
+      .post(`/api/register`, {username, email, password_one: passwordOne, password_two: passwordTwo})
       .then(result => {
         if (result.data.logged_in) {
           setLoggedUser(result.data.username);

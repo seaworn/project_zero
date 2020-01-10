@@ -1,15 +1,25 @@
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
 import { createContext } from 'react';
 
-export const AppContext = createContext({});
+export const StoreContext = createContext();
 
 export default function Store({children}) {
 
-  const [loggedUser, setLoggedUser] = useState(null);
+  let initialUserState =  {loggedIn: false};
+  const [currentUser, dispatchUserAction] = useReducer(
+    function (state, action) {
+      let newUserState = {};
+      if (action.type === 'login') newUserState = {...state, ...action.payload, loggedIn: true};
+      else if (action.type === 'logout') newUserState = initialUserState;
+      sessionStorage.setItem('user', JSON.stringify(newUserState));
+      return newUserState;
+    },
+    JSON.parse(sessionStorage.getItem('user')) || initialUserState
+  );
 
   return (
-    <AppContext.Provider value={{loggedUser, setLoggedUser}}>
+    <StoreContext.Provider value={{currentUser, dispatchUserAction}}>
       {children}
-    </AppContext.Provider>
+    </StoreContext.Provider>
   );
 }

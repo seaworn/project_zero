@@ -5,11 +5,11 @@ import axios from 'axios';
 import { NotificationManager } from 'react-notifications';
 
 import Home from './home';
-import { AppContext } from '../store';
+import { StoreContext } from '../store';
 
 export default function Login() {
 
-  const {setLoggedUser} = useContext(AppContext);
+  const {dispatchUserAction} = useContext(StoreContext);
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [validated, setValidated] = useState(false);
@@ -22,19 +22,19 @@ export default function Login() {
     if (form.checkValidity() === false) return;
     axios
       .post(`/api/login`, { user_id: userId, password })
-      .then(result => {
-        if (result.data.logged_in) {
-          setLoggedUser(result.data.username);
-          NotificationManager.success(result.data.message);
+      .then(response => {
+        if (response.data.logged_in) {
+          dispatchUserAction({type: 'login', payload: {username: response.data.username, accessToken: response.data.access_token, refreshToken: response.data.refresh_token}});
+          NotificationManager.success(response.data.message);
         } else {
-          if ('authentication_error' in result.data) {
-            NotificationManager.error(result.data.message);
+          if ('authentication_error' in response.data) {
+            NotificationManager.error(response.data.message);
           }
         }
-      })
-      .catch(error => {
-        console.error(error);
-      });
+    })
+    .catch(error => {
+      console.error(error);
+    });
   }
 
   return (

@@ -4,27 +4,26 @@ import {LinkContainer} from 'react-router-bootstrap';
 import axios from 'axios';
 import {NotificationManager} from 'react-notifications';
 
-import {AppContext} from '../store';
+import {StoreContext} from '../store';
 
 export default function Navigation() {
 
-  const {loggedUser, setLoggedUser} = useContext(AppContext);
+  const {currentUser, dispatchUserAction} = useContext(StoreContext);
   
-  function logout(...args) {
+  function logout(evenyKey, event) {
 
-    const [/*eventKey*/, e] = args;
-    e.preventDefault();
+    event.preventDefault();
     axios
-      .get(`/api/logout`)
-      .then(res => {
-        if(res.data.logged_out) {
-          NotificationManager.success(res.data.message);
+      .get(`/api/logout`, {headers: {'Authorization': `Bearer ${currentUser.accessToken}`}})
+      .then(function (response) {
+        if(response.data.logged_in === false) {
+          dispatchUserAction({type: 'logout'});
+          NotificationManager.success(response.data.message);
         }
       })
-      .catch(error => {
+      .catch(function (error) {
         console.log(error);
       });
-    setLoggedUser(null);
   }
 
   return (
@@ -70,12 +69,10 @@ export default function Navigation() {
         </Form>&nbsp;
         {
           (function () {
-            if (loggedUser !== null) {
+            if (currentUser.loggedIn === true) {
               return (
-                <NavDropdown title={loggedUser || ''} id="basic-nav-dropdown">
-                  <LinkContainer to="/logout">
-                    <NavDropdown.Item onSelect={logout}>Logout</NavDropdown.Item>
-                  </LinkContainer>
+                <NavDropdown title={currentUser.username} id="basic-nav-dropdown">
+                  <NavDropdown.Item onSelect={logout}>Logout</NavDropdown.Item>
                 </NavDropdown>
               );
             } else {
