@@ -15,7 +15,7 @@ def register():
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data, password=form.password.data)
         user.save()
-        token = create_access_token(user)
+        token = create_access_token(user.id)
         # login_user(user)
         return jsonify(username=user.username, access_token=token, logged_in=True, message='Registration successful. You are logged in.')
     return jsonify(validation_error=True, errors=form.errors, logged_in=False)
@@ -25,7 +25,7 @@ def register():
 def login():
     form = LoginForm(data=request.get_json())
     if form.validate_on_submit():
-        user = User.authenticate(form.user_id.data, form.password.data)
+        user = User.authenticate(form.userId.data, form.password.data)
         if user is not None:
             # login_user(user)
             access_token = create_access_token(user.id)

@@ -46,7 +46,6 @@ def create_app():
     app.register_blueprint(user_blueprint)
     app.register_blueprint(main_blueprint)
 
-    # @app.before_request
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
     def index(path):
